@@ -37,8 +37,6 @@ function convertUnit(value,unit,direction){
 
 //Function DragFlight - computes and returns drag flight properites and path
 function dragFlight(p){
-    //console.log('Staring new drag flight: incoming object is: ');
-  //  console.log(p);
     var tick = new Date();
 
     //set up for iterating
@@ -71,10 +69,8 @@ function dragFlight(p){
     //Check for impossible wind
     dragAccel = Math.sin(p.windAngle) * b * ( Math.pow( (wvx) ,2) + Math.pow( (wvy) ,2) ) / mass;
     if( dragAccel > p.gravity){
-      console.log('Flight impossible');
       return { displacement: 'impossible' };
     }
-    //console.log('Completeed instanciation');
 
     while( sy>=0 ){
       sx += vx * dt;
@@ -96,7 +92,6 @@ function dragFlight(p){
       t += dt;
 
       pathplot.push([ sx , sy]);
-      //console.log('SX: ' + sx + " SY: " + sy);
     }
 
     //Determines computation time
@@ -106,7 +101,6 @@ function dragFlight(p){
     //determines error
     var B = Math.sin(p.initAngle) * p.initVel;
     var ideality = p.initVel * Math.cos(p.initAngle) * ( B + Math.sqrt( Math.pow(B,2) + 2 * p.gravity * p.initHeight ) ) / p.gravity;
-    //console.log('DEBUG IDEAL: ' + ideality);
     var error = Math.abs( (ideality - sx) / ideality);
 
     //repacks pathplot to limit it to 101 spots
@@ -151,7 +145,6 @@ function idealFlight(p){
     pathPlot.push([ (vx * i) , (p.initHeight + vy * i - p.gravity * Math.pow(i,2) / 2) ])
   }
   pathPlot.push([ (vx * t) , (p.initHeight + vy * i - p.gravity * Math.pow(t,2) / 2 )])
-  //console.log( pathPlot );
   return pathPlot;
 }
 
@@ -300,32 +293,16 @@ var UIManager = function(){
       break;
     }
 
-    //$('#prop-mass-value').val(p.a);
     $('#prop-mass-value').val( (p.a=='clr')?'':p.a );
     if(p.b!='clr')$('#prop-mass-unit').val(p.b);
     $('#prop-dc-value').val((p.c=='clr')?'':p.c);
     $('#prop-ortho-value').val((p.d=='clr')?'':p.d);
     if(p.b!='clr')$('#prop-ortho-unit').val(p.e);
-    /*$('#prop-initvel-value').val((p.f=='clr')?'':p.f);
-    if(target=='ideal')$('#prop-initvel-unit').val(p.g);
-    $('#prop-angle-value').val((p.h=='clr')?'':p.h);
-    if(target=='ideal')$('#prop-angle-unit').val(p.i);
-    $('#prop-initheight-value').val((p.j=='clr')?'':p.j);
-    if(target=='ideal')$('#prop-initheight-unit').val(p.k);*/
     $('#prop-density-value').val((p.l=='clr')?'':p.l);
     if(target=='ideal')$('#prop-density-unit').val(p.m);
-    /*$('#prop-windvel-value').val((p.n=='clr')?'':p.n);
-    if(target=='ideal')$('#prop-windvel-unit').val(p.o);
-    $('#prop-windangle-value').val((p.p=='clr')?'':p.p);
-    if(target=='ideal')$('#prop-windangle-unit').val(p.q);
-    if(target=='ideal')$('#prop-iter-value').val(p.r);
-    if(target=='ideal')$('#prop-iter-unit').val(p.s);
-    if(target=='ideal')$('#prop-gravity-value').val(p.t);
-    if(target=='ideal')$('#prop-gravity-unit').val(p.u);*/
   }
 
   this.changeComputeIdeal = function(target){
-    console.log('hello!');
     $('.compute-Ideal').removeClass('btn-success').addClass('btn-default');
     $('#' + target).addClass('btn-success').removeClass('btn-default');
     this.selectedIdealPathy = target;
@@ -340,7 +317,6 @@ var UIManager = function(){
 
     $('#error-text').text('');
 
-    //console.log('DEBUG displacement: '+ data.displacement);
     switch( $('#prop-initvel-unit').val() ){
       case 'km/h':
         if( data.displacement > 2000){
@@ -366,9 +342,7 @@ var UIManager = function(){
 
     if(optimalAngle){
       var angleUnit = $('#prop-angle-unit').val();
-      console.log('Angle is (radians): ' + optimalAngle);
       $('#prop-angle-value').val( Math.round( convertUnit( optimalAngle , angleUnit , 'from') *100)/100 );
-      console.log('Angle is (degrees):' + convertUnit( optimalAngle , 'degrees' , 'from') )
     }
 
     $('#output-disp').html( (Math.round(data.displacement * 10000) / 10000) + unit);
@@ -400,7 +374,6 @@ var UIManager = function(){
       $('#'+a.formGroup).addClass('has-error');
       $('#'+a.helpID).css('display','block').html(a.message);
       myManager.flightBar = true;
-      console.log(myManager.flightBar);
     }
     function clearWarnings(){
       $('.form-group').removeClass('has-error')
@@ -410,8 +383,6 @@ var UIManager = function(){
     function addNonNumericWarning(id){
       var hyphens = [ id.indexOf("-") , id.lastIndexOf("-") ];
       var group = id.substring( hyphens[0]+1 , hyphens[1] );
-      console.log("HYPHENS: " + hyphens[0] + " : " + hyphens[1]);
-      console.log('GROUPS: ' + group);
       addWarning( {
         formGroup: 'form-' + group,
         helpID: 'help-' + group,
@@ -542,8 +513,6 @@ function createNewChart(flightData, unit){
     $('#graph-itself').height( ((height<50)?50:height) );
 
     flightData.pathPlot.unshift(['X','Drag Flight'])
-    //console.log(flightData.pathPlot)
-    console.log(flightData.pathPlot);
     var data = google.visualization.arrayToDataTable(flightData.pathPlot);
 
       var options = {
@@ -577,8 +546,6 @@ function createCombinedChart(flightData, unit){
 
     function drawChart2() {
       var width = $('#graph-itself').width();
-      console.log('flightData')
-      console.log(flightData);
       var maxDisp = 1;
       var maxHeight = 1;
       for(var i = 0; i < flightData.length; i++){
@@ -597,7 +564,6 @@ function createCombinedChart(flightData, unit){
       $('#graph-itself').height( height );
 
       flightData.unshift(['X','Drag Flight','Ideal Flight'])
-      //console.log(flightData.pathPlot)
 
       var data = google.visualization.arrayToDataTable(flightData);
 
@@ -634,7 +600,6 @@ function dataGather(){
       gravity: convertUnit( $('#prop-gravity-value').val() , $('#prop-gravity-unit').val() , 'to')
     }
 
-  console.log(p);
   return p;
 }
 
@@ -649,9 +614,7 @@ $(document).ready(function(){
   $('#run').click(function(){
     myManager.changeRunButton();
     var inputs = dataGather();
-    console.log('FLIGHTBAR: ' + myManager.flightBar)
     if(myManager.flightBar){
-      console.log('There was an error in the input!');
       myManager.runError("Looks like there's a problem with one or more inputs. Follow the suggestions to fix the problem, then run the simulation again!")
       return;
     }
@@ -661,13 +624,11 @@ $(document).ready(function(){
     //run test case
     outputs = dragFlight( inputs );
     if(outputs.displacement == 'impossible'){
-      console.log('Handling Impossiblility');
       myManager.runError("Looks like the flight couldn't be worked out because the force from the wind was greater than gravity! Try decreasing the wind velocity or changing its direction, then hit compute again!");
       return;
     }
 
     if(myManager.selectedMethod =='angle'){
-      //console.log('DEBUG: finding angle')
       //Finds the optimal angle
       var maxDistance = 0;
       var a = 0; //iterating angle
@@ -695,37 +656,27 @@ $(document).ready(function(){
         if(maxDistance < outputs.displacement){
           maxDistance = outputs.displacement;
         }
-        //console.log('DEBUG: ANGLE: ' + a + ' DISTANCE: ' + outputs.displacement + ' MAXDISTANCE: ' + maxDistance + ' PREVIOUS: ' + previousDistance);
         dispArray.push(outputs.displacement);
         angleArray.push(a);
       }
 
       var searchIndex = dispArray.indexOf(maxDistance);
-      console.log(maxDistance);
-      console.log(searchIndex);
       a = angleArray[ searchIndex ];
-      console.log( a );
       inputs.initAngle = convertUnit( a, 'degrees', 'to' );
       outputs = dragFlight( inputs );
-      console.log( outputs );
 
       var tock1 = new Date();
 
       outputs.computationTime = tock1.getTime() - tick1.getTime();
-      //console.log('Found and posting flight')
-      //myManager.postFlightData( outputs , convertUnit(a,'degrees','to') , null );
       optimalAngle = convertUnit( a, 'degrees','to');
     } else {
       outputs = dragFlight( inputs );
     }
-    console.log('PRINTING OUTPUTS');
-    console.log(outputs);
 
     ////Finds the distance of a single flight
     if(myManager.selectedIdealPathy=='omit'){
       myManager.postFlightData( outputs , optimalAngle , null );
     } else {
-      console.log('Running with ideality');
       var outputs1 = outputs;
       var outputs2 = idealFlight( inputs );
       myManager.postFlightData( outputs1, optimalAngle, combineFlights( outputs1, outputs2) );
