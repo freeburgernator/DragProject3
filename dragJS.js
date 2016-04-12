@@ -407,7 +407,27 @@ var UIManager = function(){
       $('.validation-error').css('display','none').addClass('text-right').html('');
     }
 
+    function addNonNumericWarning(id){
+      var hyphens = [ id.indexOf("-") , id.lastIndexOf("-") ];
+      var group = id.substring( hyphens[0]+1 , hyphens[1] );
+      console.log("HYPHENS: " + hyphens[0] + " : " + hyphens[1]);
+      console.log('GROUPS: ' + group);
+      addWarning( {
+        formGroup: 'form-' + group,
+        helpID: 'help-' + group,
+        message: 'The value must be a real number.'
+      });
+    }
+
     clearWarnings();
+
+    //Determines if all the inputs are numbers;
+    $('input.form-control').each(function(){
+      if( !$.isNumeric( this.value ) ){
+        addNonNumericWarning( this.id );
+      }
+    });
+
 
     if( $('#prop-mass-value').val() <= 0){
       addWarning( {
@@ -716,4 +736,5 @@ $(document).ready(function(){
   $('.form-control').blur(function(){
     myManager.validateInput();
   });
+
 });
