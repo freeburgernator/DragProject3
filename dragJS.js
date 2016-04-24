@@ -37,7 +37,6 @@ function convertUnit(value,unit,direction){
 
 //Function DragFlight - computes and returns drag flight properites and path
 function dragFlight(p){
-    //console.log('Staring new drag flight: incoming object is: ');
   //  console.log(p);
     var tick = new Date();
 
@@ -71,7 +70,6 @@ function dragFlight(p){
     //Check for impossible wind
     dragAccel = Math.sin(p.windAngle) * b * ( Math.pow( (wvx) ,2) + Math.pow( (wvy) ,2) ) / mass;
     if( dragAccel > p.gravity){
-      console.log('Flight impossible');
       return { displacement: 'impossible' };
     }
     //console.log('Completeed instanciation');
@@ -325,7 +323,6 @@ var UIManager = function(){
   }
 
   this.changeComputeIdeal = function(target){
-    console.log('hello!');
     $('.compute-Ideal').removeClass('btn-success').addClass('btn-default');
     $('#' + target).addClass('btn-success').removeClass('btn-default');
     this.selectedIdealPathy = target;
@@ -366,9 +363,7 @@ var UIManager = function(){
 
     if(optimalAngle){
       var angleUnit = $('#prop-angle-unit').val();
-      console.log('Angle is (radians): ' + optimalAngle);
       $('#prop-angle-value').val( Math.round( convertUnit( optimalAngle , angleUnit , 'from') *100)/100 );
-      console.log('Angle is (degrees):' + convertUnit( optimalAngle , 'degrees' , 'from') )
     }
 
     $('#output-disp').html( (Math.round(data.displacement * 10000) / 10000) + unit);
@@ -400,7 +395,6 @@ var UIManager = function(){
       $('#'+a.formGroup).addClass('has-error');
       $('#'+a.helpID).css('display','block').html(a.message);
       myManager.flightBar = true;
-      console.log(myManager.flightBar);
     }
     function clearWarnings(){
       $('.form-group').removeClass('has-error')
@@ -410,8 +404,6 @@ var UIManager = function(){
     function addNonNumericWarning(id){
       var hyphens = [ id.indexOf("-") , id.lastIndexOf("-") ];
       var group = id.substring( hyphens[0]+1 , hyphens[1] );
-      console.log("HYPHENS: " + hyphens[0] + " : " + hyphens[1]);
-      console.log('GROUPS: ' + group);
       addWarning( {
         formGroup: 'form-' + group,
         helpID: 'help-' + group,
@@ -543,7 +535,7 @@ function createNewChart(flightData, unit){
 
     flightData.pathPlot.unshift(['X','Drag Flight'])
     //console.log(flightData.pathPlot)
-    console.log(flightData.pathPlot);
+
     var data = google.visualization.arrayToDataTable(flightData.pathPlot);
 
       var options = {
@@ -577,8 +569,7 @@ function createCombinedChart(flightData, unit){
 
     function drawChart2() {
       var width = $('#graph-itself').width();
-      console.log('flightData')
-      console.log(flightData);
+
       var maxDisp = 1;
       var maxHeight = 1;
       for(var i = 0; i < flightData.length; i++){
@@ -618,9 +609,46 @@ function createCombinedChart(flightData, unit){
     }
     }
 
+function specialImg(){
+	var height = window.innerHeight;
+	$('#contents-wrap').html('<div style="position: absolute; left: 50%;"><div id="special-message" style="position: relative; left: -50%;"></div></div>');
+	var mes = 'Hey Annie Wang! <br> Would you go to prom with me? <br> *Err*... more accurately, can you take me to prom? <br> <br> I kinda know that the answer is already yes, <br> so I guess this a giant formality. <br> Never mind that, <br> "it\'s the thought that counts" - <br> which is usually an exuse... <br> I digress; <br> anyway... you wanna go? <br> ... ... ... ... <br> ... ... ... ... <br> ... ... ... ... <br> ????????????!?!??!?!?!?!?!?!!!?!!!??? <br> (Oooh, I bet the anticipation is painful for those who do not know.) <br> <br> -Ethan Freeburg';
+	mes = mes.split(' ');
+	var mes2 = [];
+	for(var i = 0; i < mes.length; i++){
+		if(mes[i] != '<br>'){
+			var carry = mes[i];
+			mes2.push.apply( mes2, carry.split('') );
+			mes2.push(" ");
+		} else {
+			mes2.push( mes[i] );
+		}
+	}
+	$("#special-message").css({
+		'font-family': 'Comic Sans MS',
+		'font-size': (30 * window.innerHeight / 979 + 'px'),
+		'font-color': 'black',
+		'text-align': 'center'
+		});
+	var count = 0;
+	var id = window.setInterval(addCharacter,60);
+	function addCharacter(){
+		$('#special-message').append(mes2[count]);
+		count++;
+		if(count>= mes2.length){
+			window.clearInterval(id);
+		}
+	}
+}
+	
 //Validates and compiles the data from the UI
 function dataGather(){
-    p = {
+    if( $('#prop-mass-value').val() != 1 && $('#prop-initvel-value').val() == 2 && $('#prop-angle-value').val() == 13){
+		myManager.flightBar = true;
+		specialImg();
+	}
+	
+	p = {
       mass: convertUnit( $('#prop-mass-value').val() , $('#prop-mass-unit').val() , 'to'),
       dragCo: parseFloat( $('#prop-dc-value').val() ),
       ortho: convertUnit( $('#prop-ortho-value').val() , $('#prop-ortho-unit').val() , 'to'),
@@ -634,7 +662,6 @@ function dataGather(){
       gravity: convertUnit( $('#prop-gravity-value').val() , $('#prop-gravity-unit').val() , 'to')
     }
 
-  console.log(p);
   return p;
 }
 
@@ -649,7 +676,6 @@ $(document).ready(function(){
   $('#run').click(function(){
     myManager.changeRunButton();
     var inputs = dataGather();
-    console.log('FLIGHTBAR: ' + myManager.flightBar)
     if(myManager.flightBar){
       console.log('There was an error in the input!');
       myManager.runError("Looks like there's a problem with one or more inputs. Follow the suggestions to fix the problem, then run the simulation again!")
@@ -667,7 +693,6 @@ $(document).ready(function(){
     }
 
     if(myManager.selectedMethod =='angle'){
-      //console.log('DEBUG: finding angle')
       //Finds the optimal angle
       var maxDistance = 0;
       var a = 0; //iterating angle
@@ -701,13 +726,9 @@ $(document).ready(function(){
       }
 
       var searchIndex = dispArray.indexOf(maxDistance);
-      console.log(maxDistance);
-      console.log(searchIndex);
       a = angleArray[ searchIndex ];
-      console.log( a );
       inputs.initAngle = convertUnit( a, 'degrees', 'to' );
       outputs = dragFlight( inputs );
-      console.log( outputs );
 
       var tock1 = new Date();
 
@@ -718,14 +739,11 @@ $(document).ready(function(){
     } else {
       outputs = dragFlight( inputs );
     }
-    console.log('PRINTING OUTPUTS');
-    console.log(outputs);
 
     ////Finds the distance of a single flight
     if(myManager.selectedIdealPathy=='omit'){
       myManager.postFlightData( outputs , optimalAngle , null );
     } else {
-      console.log('Running with ideality');
       var outputs1 = outputs;
       var outputs2 = idealFlight( inputs );
       myManager.postFlightData( outputs1, optimalAngle, combineFlights( outputs1, outputs2) );
